@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class yarr {
+    //test change
     int sizeX;
     int sizeY; 
     public static void init(){

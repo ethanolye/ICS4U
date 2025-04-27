@@ -1,9 +1,7 @@
-10
-10
-this 
-test 
+this
+test
 file
 contains
-seven 
+seven
 words
-inside 
+inside

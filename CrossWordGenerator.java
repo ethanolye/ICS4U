@@ -1,19 +1,15 @@
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Random;
 
 public class CrossWordGenerator {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        ArrayList<String> wordList = makeWordList(input);
-        System.out.println(wordList); //debug
 
         //Crossword grid setup
-        int[] gridDimensions = getGridDimensions(input);
-        char[][] crosswordGrid = new char[gridDimensions[0]][gridDimensions[1]];
-        System.out.println(Arrays.deepToString(crosswordGrid)); //debug
+        generateCrossword(makeWordList(input),getGridDimensions(input));
 
         PrintWriter outputFile = makeOutputFile(input);
         outputFile.println("test"); //debug
@@ -36,7 +32,7 @@ public class CrossWordGenerator {
     }
 
     //Makes the word list
-    public static ArrayList<String> makeWordList(Scanner input) {
+    public static String[] makeWordList(Scanner input) {
         Scanner inputFile = getInputFile(input);
         //Makes sure the input file contains valid words and adds it to word list
         ArrayList<String> wordList = new ArrayList<String>();
@@ -60,7 +56,8 @@ public class CrossWordGenerator {
                 wordList.clear();
             }
         }
-            return wordList;
+            String[] returnList = new String[wordList.size()];
+            return wordList.toArray(returnList);
        
     }
 
@@ -102,5 +99,34 @@ public class CrossWordGenerator {
             }
         }
         return gridDimensions;
+    }
+
+    public static void generateCrossword(String[] wordList, int[] gridDimensions) {
+        Random rng = new Random();
+        char[][] crosswordGrid = new char[gridDimensions[1]][gridDimensions[0]];
+        for (int currentWord = 0; currentWord < wordList.length; currentWord++) {
+            //placeWord(wordList[currentWord], {rng.nextInt(crosswordGrid[0].length - 1), rng.nextInt(crosswordGrid.length - 1)});
+            crosswordGrid[rng.nextInt(crosswordGrid[0].length - 1)][rng.nextInt(crosswordGrid.length - 1)] = wordList[currentWord].charAt(0);
+            int direction = rng.nextInt(8);
+        }
+        printCrossword(crosswordGrid); //debug
+
+
+    }
+
+    public static void printCrossword(char[][] crosswordGrid) {
+        for (int i = 0; i < crosswordGrid.length; i++) {
+            for (int j = 0; j < crosswordGrid.length; j++) {
+                if (crosswordGrid[i][j] == '\u0000') {
+                    System.out.print("-"); // debug for empty spaces
+                }
+                System.out.print(crosswordGrid[i][j] + " ");
+            }
+            System.out.println("");
+        }
+    }
+
+    public static void placeWord(String word, int[] position) {
+        
     }
 }

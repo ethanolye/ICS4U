@@ -7,8 +7,37 @@ import java.util.Scanner;
 public class CrossWordGenerator {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        Scanner inputFile = getInputFile(input);
+        ArrayList<String> wordList = makeWordList(input);
+        System.out.println(wordList); //debug
 
+        //Crossword grid setup
+        int[] gridDimensions = getGridDimensions(input);
+        char[][] crosswordGrid = new char[gridDimensions[0]][gridDimensions[1]];
+        System.out.println(Arrays.deepToString(crosswordGrid)); //debug
+
+        PrintWriter outputFile = makeOutputFile(input);
+        outputFile.println("test"); //debug
+        outputFile.close();
+    }
+
+    //Returns a scanner that reads the inputed file
+    public static Scanner getInputFile(Scanner input){
+        while (true) {
+            System.out.print("\nEnter The Input File Name: ");
+        
+            try {
+                return new Scanner(new File(input.nextLine()));
+
+            } catch (Exception e) {
+                System.out.print("Invalid File Name Try Again");
+                continue;
+            }
+        }
+    }
+
+    //Makes the word list
+    public static ArrayList<String> makeWordList(Scanner input) {
+        Scanner inputFile = getInputFile(input);
         //Makes sure the input file contains valid words and adds it to word list
         ArrayList<String> wordList = new ArrayList<String>();
         while (inputFile.hasNextLine()) {
@@ -31,32 +60,11 @@ public class CrossWordGenerator {
                 wordList.clear();
             }
         }
-
-        //Crossword grid setup
-        int[] gridDimensions = getGridDimensions(input);
-        char[][] crosswordGrid = new char[gridDimensions[0]][gridDimensions[1]];
-        System.out.println(Arrays.deepToString(crosswordGrid));
-
-        PrintWriter outputFile = makeOutputFile(input);
-        outputFile.println("test");
-        outputFile.close();
+            return wordList;
+       
     }
 
-    //Returns a scanner that reads the inputed file
-    public static Scanner getInputFile(Scanner input){
-        while (true) {
-            System.out.print("\nEnter The Input File Name: ");
-        
-            try {
-                return new Scanner(new File(input.nextLine()));
-
-            } catch (Exception e) {
-                System.out.print("Invalid File Name Try Again");
-                continue;
-            }
-        }
-    }
-
+    //Makes the output file
     public static PrintWriter makeOutputFile(Scanner input){
         while (true) {
             System.out.print("\nEnter The Solution File Name: ");

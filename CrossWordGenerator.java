@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -8,8 +10,18 @@ public class CrossWordGenerator {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
 
+        HashMap <Integer,int[]> directionMap = new HashMap<Integer,int[]>();
+        directionMap.put(0, new int[]{0,-1});
+        directionMap.put(1, new int[]{1,-1});
+        directionMap.put(2, new int[]{1,0});
+        directionMap.put(3, new int[]{1,1});
+        directionMap.put(4, new int[]{0,1});
+        directionMap.put(5, new int[]{-1,1});
+        directionMap.put(6, new int[]{-1,0});
+        directionMap.put(7, new int[]{-1,-1});
+
         //Crossword grid setup
-        generateCrossword(makeWordList(input),getGridDimensions(input));
+        generateCrossword(makeWordList(input), getGridDimensions(input), directionMap);
 
         PrintWriter outputFile = makeOutputFile(input);
         outputFile.println("test"); //debug
@@ -101,13 +113,13 @@ public class CrossWordGenerator {
         return gridDimensions;
     }
 
-    public static void generateCrossword(String[] wordList, int[] gridDimensions) {
-        Random rng = new Random();
-        char[][] crosswordGrid = new char[gridDimensions[1]][gridDimensions[0]];
+    public static void generateCrossword(String[] wordList, int[] gridDimensions, HashMap<Integer,int[]> directionMap) {
+        char[][] crosswordGrid = new char[gridDimensions[0]][gridDimensions[1]];
         for (int currentWord = 0; currentWord < wordList.length; currentWord++) {
-            //placeWord(wordList[currentWord], {rng.nextInt(crosswordGrid[0].length - 1), rng.nextInt(crosswordGrid.length - 1)});
-            crosswordGrid[rng.nextInt(crosswordGrid[0].length - 1)][rng.nextInt(crosswordGrid.length - 1)] = wordList[currentWord].charAt(0);
-            int direction = rng.nextInt(8);
+            crosswordGrid = Arrays.copyOf(placeWord(crosswordGrid, wordList[currentWord], directionMap), crosswordGrid.length);
+            
+            //crosswordGrid[rng.nextInt(crosswordGrid.length - 1)][rng.nextInt(crosswordGrid[0].length - 1)] = wordList[currentWord].charAt(0);
+            //int direction = rng.nextInt(8);
         }
         printCrossword(crosswordGrid); //debug
 
@@ -116,17 +128,52 @@ public class CrossWordGenerator {
 
     public static void printCrossword(char[][] crosswordGrid) {
         for (int i = 0; i < crosswordGrid.length; i++) {
-            for (int j = 0; j < crosswordGrid.length; j++) {
+            for (int j = 0; j < crosswordGrid[0].length; j++) {
                 if (crosswordGrid[i][j] == '\u0000') {
-                    System.out.print("-"); // debug for empty spaces
+                    System.out.print("\u001B[30m"  + "-"); // debug for empty spaces
                 }
-                System.out.print(crosswordGrid[i][j] + " ");
+                System.out.print("\u001B[32m" + crosswordGrid[i][j] + " " + "\u001B[0m");
             }
             System.out.println("");
         }
     }
 
-    public static void placeWord(String word, int[] position) {
+    public static char[][] placeWord(char[][] crosswordGrid, String word, HashMap<Integer,int[]> directionMap) {
         
+        //Create a copy of the grid
+        char[][] returnGrid = Arrays.copyOf(crosswordGrid, crosswordGrid.length);
+
+        //Create the random number generator
+        Random rng = new Random();
+
+        //Grab the direction matrix
+        int[] direction = directionMap.get(rng.nextInt(8));
+
+        //Picks a random starting space
+        //TODO make it so this wont place on an already placed letter
+        int[] startPosition = {rng.nextInt(crosswordGrid.length),rng.nextInt(crosswordGrid[0].length)};
+        
+        //Trys to place the word
+        try {
+            for (int letter = 0; letter < word.length(); letter++) {
+                //If the space is empty or is a maching letter the space is valid
+                if (returnGrid[startPosition[0]][startPosition[1]] == '\u0000' || returnGrid[startPosition[0]][startPosition[1]] == word.charAt(letter)) {
+                    returnGrid[startPosition[0]][startPosition[1]] = word.charAt(letter);
+                    startPosition = new int[]{startPosition[0] + direction[0], startPosition[1] + direction[1]}; //Moves
+                }
+                //If it is not throw an error
+                else {
+                    throw new Exception();
+                }
+            }
+            //Return the updated grid
+            return returnGrid;
+
+        //Exception if the word is not placed
+        } catch (Exception e) {
+            System.out.println(Arrays.toString(startPosition) + " | " + Arrays.toString(direction)); //TODO debug
+            return placeWord(crosswordGrid, word, directionMap);
+
+        }
     }
 }

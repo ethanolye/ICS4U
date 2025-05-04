@@ -115,12 +115,11 @@ public class CrossWordGenerator {
 
     public static void generateCrossword(String[] wordList, int[] gridDimensions, HashMap<Integer,int[]> directionMap) {
         char[][] crosswordGrid = new char[gridDimensions[0]][gridDimensions[1]];
+
         for (int currentWord = 0; currentWord < wordList.length; currentWord++) {
             crosswordGrid = Arrays.copyOf(placeWord(crosswordGrid, wordList[currentWord], directionMap), crosswordGrid.length);
-            
-            //crosswordGrid[rng.nextInt(crosswordGrid.length - 1)][rng.nextInt(crosswordGrid[0].length - 1)] = wordList[currentWord].charAt(0);
-            //int direction = rng.nextInt(8);
         }
+        
         printCrossword(crosswordGrid); //debug
 
 
@@ -171,9 +170,8 @@ public class CrossWordGenerator {
 
         //Exception if the word is not placed
         } catch (Exception e) {
-            System.out.println(Arrays.toString(startPosition) + " | " + Arrays.toString(direction)); //TODO debug
+            System.out.println(word + " | " + Arrays.toString(startPosition) + " | " + Arrays.toString(direction)); //TODO debug
             return placeWord(crosswordGrid, word, directionMap);
-
         }
     }
 }

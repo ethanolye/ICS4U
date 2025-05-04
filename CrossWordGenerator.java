@@ -115,12 +115,15 @@ public class CrossWordGenerator {
 
     public static void generateCrossword(String[] wordList, int[] gridDimensions, HashMap<Integer,int[]> directionMap) {
         char[][] crosswordGrid = new char[gridDimensions[0]][gridDimensions[1]];
+        Random rng = new Random();
 
-        for (int currentWord = 0; currentWord < wordList.length; currentWord++) {
-            crosswordGrid = Arrays.copyOf(placeWord(crosswordGrid, wordList[currentWord], directionMap), crosswordGrid.length);
-        }
+        crosswordGrid = placeWord(crosswordGrid, wordList, directionMap, rng, 0, 0);
         
         printCrossword(crosswordGrid); //debug
+
+        crosswordGrid = fillGrid(crosswordGrid, rng);
+
+        printCrossword(crosswordGrid);
 
 
     }
@@ -137,27 +140,28 @@ public class CrossWordGenerator {
         }
     }
 
-    public static char[][] placeWord(char[][] crosswordGrid, String word, HashMap<Integer,int[]> directionMap) {
+    public static char[][] placeWord(char[][] crosswordGrid, String[] wordList, HashMap<Integer,int[]> directionMap, Random rng, int currentWord,int attempt) {
         
-        //Create a copy of the grid
-        char[][] returnGrid = Arrays.copyOf(crosswordGrid, crosswordGrid.length);
+        //Base case
+        if (currentWord >= wordList.length) {
+            return crosswordGrid;
+        }
 
-        //Create the random number generator
-        Random rng = new Random();
+        //Create a copy of the grid
+        char[][] returnGrid = Arrays.stream(crosswordGrid).map(char[]::clone).toArray(char[][]::new);
 
         //Grab the direction matrix
         int[] direction = directionMap.get(rng.nextInt(8));
 
         //Picks a random starting space
-        //TODO make it so this wont place on an already placed letter
-        int[] startPosition = {rng.nextInt(crosswordGrid.length),rng.nextInt(crosswordGrid[0].length)};
+        int[] startPosition = {rng.nextInt(crosswordGrid.length), rng.nextInt(crosswordGrid[0].length)};
         
         //Trys to place the word
         try {
-            for (int letter = 0; letter < word.length(); letter++) {
+            for (int letter = 0; letter < wordList[currentWord].length(); letter++) {
                 //If the space is empty or is a maching letter the space is valid
-                if (returnGrid[startPosition[0]][startPosition[1]] == '\u0000' || returnGrid[startPosition[0]][startPosition[1]] == word.charAt(letter)) {
-                    returnGrid[startPosition[0]][startPosition[1]] = word.charAt(letter);
+                if (returnGrid[startPosition[0]][startPosition[1]] == '\u0000' || returnGrid[startPosition[0]][startPosition[1]] == wordList[currentWord].charAt(letter)) {
+                    returnGrid[startPosition[0]][startPosition[1]] = wordList[currentWord].charAt(letter);
                     startPosition = new int[]{startPosition[0] + direction[0], startPosition[1] + direction[1]}; //Moves
                 }
                 //If it is not throw an error
@@ -166,12 +170,25 @@ public class CrossWordGenerator {
                 }
             }
             //Return the updated grid
-            return returnGrid;
+            return placeWord(returnGrid, wordList, directionMap, rng, currentWord+=1, 0);
 
         //Exception if the word is not placed
         } catch (Exception e) {
-            System.out.println(word + " | " + Arrays.toString(startPosition) + " | " + Arrays.toString(direction)); //TODO debug
-            return placeWord(crosswordGrid, word, directionMap);
+            System.out.println(wordList[currentWord] + " | " + Arrays.toString(startPosition) + " | " + Arrays.toString(direction)); //TODO debug
+            // if (attempt > crosswordGrid.length * crosswordGrid[0].length) {
+            //     return placeWord(crosswordGrid, wordList, directionMap, rng, currentWord, 0);
+            // }
+            return placeWord(crosswordGrid, wordList, directionMap, rng, currentWord, attempt+=1);
         }
+    }
+
+    public static char[][] fillGrid(char[][] crosswordGrid, Random rng) {
+        char[][] returnGrid = Arrays.stream(crosswordGrid).map(char[]::clone).toArray(char[][]::new);
+        for (int i = 0; i < returnGrid.length; i++) {
+            for (int j = 0; j < returnGrid.length; j++) {
+                if (returnGrid[i][j] == '\u0000'){returnGrid[i][j] = (char)(rng.nextInt(26) + 'a');}
+            }
+        }
+        return returnGrid;
     }
 }

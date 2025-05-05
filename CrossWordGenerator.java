@@ -20,15 +20,32 @@ public class CrossWordGenerator {
         directionMap.put(6, new int[]{-1,0});
         directionMap.put(7, new int[]{-1,-1});
 
-        String[] wordList = makeWordList(input);
-        int[] gridDimensions = getGridDimensions(input);
+        boolean runFile = true;
 
-        //Crossword grid setup
-        char[][] crossword = placeWord(new char[gridDimensions[0]][gridDimensions[1]], wordList, directionMap, rng, 0, 0);
+        while (runFile) {
+            String[] wordList = makeWordList(input);
+            int[] gridDimensions = getGridDimensions(input);
+
+            //Crossword grid setup
+            char[][] crossword = placeWord(new char[gridDimensions[0]][gridDimensions[1]], wordList, directionMap, rng, 0, 0);
         
-        printCrossword(crossword, makeOutputFile(input, "Solutions"));
-        printCrossword(fillGrid(crossword, rng), makeOutputFile(input, "Puzzle"));
+            printCrossword(crossword, makeOutputFile(input, "Solutions"));
+            printCrossword(fillGrid(crossword, rng), makeOutputFile(input, "Puzzle"));
+            System.out.println("\nCrossword Generated!");
 
+            //Promps the user to run again
+            while (true) {
+                System.out.print("\nRun Program Again (y/n): ");
+                String response = input.nextLine();
+                if (response.matches("n")){
+                    runFile = false;
+                    break;
+                }
+                else if (response.matches("y")){break;}
+                else{System.out.println("Invalid Input Must Be 'y' or 'n'");
+            }
+            }
+        }
     }
 
     //Returns a scanner that reads the inputed file

@@ -9,7 +9,7 @@ import java.util.Random;
 public class CrossWordGenerator {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-
+        Random rng = new Random();
         HashMap <Integer,int[]> directionMap = new HashMap<Integer,int[]>();
         directionMap.put(0, new int[]{0,-1});
         directionMap.put(1, new int[]{1,-1});
@@ -20,12 +20,15 @@ public class CrossWordGenerator {
         directionMap.put(6, new int[]{-1,0});
         directionMap.put(7, new int[]{-1,-1});
 
-        //Crossword grid setup
-        generateCrossword(makeWordList(input), getGridDimensions(input), directionMap);
+        String[] wordList = makeWordList(input);
+        int[] gridDimensions = getGridDimensions(input);
 
-        PrintWriter outputFile = makeOutputFile(input);
-        outputFile.println("test"); //debug
-        outputFile.close();
+        //Crossword grid setup
+        char[][] crossword = placeWord(new char[gridDimensions[0]][gridDimensions[1]], wordList, directionMap, rng, 0, 0);
+        
+        printCrossword(crossword, makeOutputFile(input, "Solutions"));
+        printCrossword(fillGrid(crossword, rng), makeOutputFile(input, "Puzzle"));
+
     }
 
     //Returns a scanner that reads the inputed file
@@ -74,10 +77,10 @@ public class CrossWordGenerator {
     }
 
     //Makes the output file
-    public static PrintWriter makeOutputFile(Scanner input){
+    public static PrintWriter makeOutputFile(Scanner input, String fileType){
         while (true) {
-            System.out.print("\nEnter The Solution File Name: ");
-            input.nextLine();
+            System.out.printf("\nEnter The %s File Name: ",fileType);
+
             try {
                 return new PrintWriter(input.nextLine());
 
@@ -110,34 +113,23 @@ public class CrossWordGenerator {
                 }
             }
         }
+        input.nextLine();
         return gridDimensions;
     }
 
-    public static void generateCrossword(String[] wordList, int[] gridDimensions, HashMap<Integer,int[]> directionMap) {
-        char[][] crosswordGrid = new char[gridDimensions[0]][gridDimensions[1]];
-        Random rng = new Random();
-
-        crosswordGrid = placeWord(crosswordGrid, wordList, directionMap, rng, 0, 0);
-        
-        printCrossword(crosswordGrid); //debug
-
-        crosswordGrid = fillGrid(crosswordGrid, rng);
-
-        printCrossword(crosswordGrid);
-
-
-    }
-
-    public static void printCrossword(char[][] crosswordGrid) {
+    public static void printCrossword(char[][] crosswordGrid, PrintWriter file) {
         for (int i = 0; i < crosswordGrid.length; i++) {
             for (int j = 0; j < crosswordGrid[0].length; j++) {
                 if (crosswordGrid[i][j] == '\u0000') {
-                    System.out.print("\u001B[30m"  + "-"); // debug for empty spaces
+                    file.print("·");
                 }
-                System.out.print("\u001B[32m" + crosswordGrid[i][j] + " " + "\u001B[0m");
+                else {
+                    file.print(crosswordGrid[i][j]);
+                }
             }
-            System.out.println("");
+            file.println("");
         }
+        file.close();
     }
 
     public static char[][] placeWord(char[][] crosswordGrid, String[] wordList, HashMap<Integer,int[]> directionMap, Random rng, int currentWord,int attempt) {
@@ -175,9 +167,6 @@ public class CrossWordGenerator {
         //Exception if the word is not placed
         } catch (Exception e) {
             System.out.println(wordList[currentWord] + " | " + Arrays.toString(startPosition) + " | " + Arrays.toString(direction)); //TODO debug
-            // if (attempt > crosswordGrid.length * crosswordGrid[0].length) {
-            //     return placeWord(crosswordGrid, wordList, directionMap, rng, currentWord, 0);
-            // }
             return placeWord(crosswordGrid, wordList, directionMap, rng, currentWord, attempt+=1);
         }
     }
@@ -185,7 +174,7 @@ public class CrossWordGenerator {
     public static char[][] fillGrid(char[][] crosswordGrid, Random rng) {
         char[][] returnGrid = Arrays.stream(crosswordGrid).map(char[]::clone).toArray(char[][]::new);
         for (int i = 0; i < returnGrid.length; i++) {
-            for (int j = 0; j < returnGrid.length; j++) {
+            for (int j = 0; j < returnGrid[0].length; j++) {
                 if (returnGrid[i][j] == '\u0000'){returnGrid[i][j] = (char)(rng.nextInt(26) + 'a');}
             }
         }

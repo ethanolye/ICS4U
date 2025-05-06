@@ -1,15 +1,20 @@
+//Imports all necessary packages 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
-
-import javax.swing.*;
-import java.awt.*;
-
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.BorderFactory;
+import javax.swing.SwingConstants;
+import java.awt.GridLayout;
+import java.awt.Color;
 
 public class CrosswordSolver extends JFrame {
     public static void main(String[] args) {
+        //TODO let them run again
+        //A Hashmap that converts a number (0-7) to a direction matrix
+        //0 is north and it rotates clockwise
         HashMap <Integer,int[]> directionMap = new HashMap<Integer,int[]>();
         directionMap.put(0, new int[]{0,-1});
         directionMap.put(1, new int[]{1,-1});
@@ -20,32 +25,40 @@ public class CrosswordSolver extends JFrame {
         directionMap.put(6, new int[]{-1,0});
         directionMap.put(7, new int[]{-1,-1});
 
+        //Input used for reading the terminal
         Scanner input = new Scanner(System.in);
 
+        //String array with a list of words
         String[] wordList = makeWordList(input);
-        System.out.println(Arrays.toString(wordList));
 
-        Scanner crosswordFile = getInputFile(input);
-        char[][] crosswordGrid = readCrossword(crosswordFile);
+        //Creates the crossword grid
+        char[][] crosswordGrid = readCrossword(getInputFile(input));
 
+        //Creates an array to store the solution
         char[][] solutionGrid = new char[crosswordGrid.length][crosswordGrid[0].length];
+
+        // Start of the execution timer
+        double startTime = System.nanoTime(); 
         
         for (String word : wordList) { //for each word
             wordLoop:
             for (int i = 0; i < crosswordGrid.length; i++) { //for each column
                 for (int j = 0; j < crosswordGrid[0].length; j++) { //for each row
-                    if(crosswordGrid[i][j] == word.charAt(0)) { // if the character at a given position match the first lette of the word
+                    if (crosswordGrid[i][j] == word.charAt(0)) { // if the character at a given position match the first letter of the word
                         for (int angle = 0; angle < 8; angle++) { // for each angle
                             try {
-                                for (int letter = 0; letter < word.length(); letter++) {
+                                for (int letter = 0; letter < word.length(); letter++){ //Moves forward and checks if the it matches the word
+                                    //If it does not match throw an error
                                     if (crosswordGrid[i + (directionMap.get(angle)[1] * letter)][j + (directionMap.get(angle)[0] * letter)] != word.charAt(letter)){
                                         throw new Exception();
                                     }
                                 }
 
+                                //If the maches it is found and writen to the solution grid
                                 for (int letter = 0; letter < word.length(); letter++){
                                     solutionGrid[i + (directionMap.get(angle)[1] * letter)][j + (directionMap.get(angle)[0] * letter)] = word.charAt(letter);
                                 }
+                                //Moves on to the next word
                                 break wordLoop;
                             } catch (Exception e) {
                                 continue;
@@ -56,49 +69,44 @@ public class CrosswordSolver extends JFrame {
             }
         }
 
-        //TODO debug output file
-        for (int i = 0; i < solutionGrid.length; i++) {
-            for (int j = 0; j < solutionGrid.length; j++) {
-                if (solutionGrid[i][j] == '\u0000') {
-                    System.out.print("·");
-                }
-                else{
-                System.out.print(solutionGrid[i][j]);
-                }
-            }
-            System.out.println("");
-        }
-        CrosswordSolver frame1 = new CrosswordSolver(solutionGrid);
+        // End of the execution timer
+        double stopTime = System.nanoTime();
+
+        //Displays the window
+        new CrosswordSolver(solutionGrid, crosswordGrid,(stopTime-startTime) / 1000000);
     }
 
-    public CrosswordSolver(char[][] solutionGrid) { 
-        setTitle("GUIExample Frame");
-        setSize(320, 240);
+    //The visuals output of the file
+    public CrosswordSolver(char[][] solutionGrid, char[][] crosswordGrid, double executionTime) { 
+        //Sets the tiles to the run time of the file
+        setTitle("Wordsearch Solver (Executed in " + Double.toString(executionTime) + "ms)");
+
+        //Sets the size of the window
+        setSize(400, 400);
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // set layout   
+
+        //Creates the grid to display the wordsearch on
         setLayout(new GridLayout(solutionGrid.length,solutionGrid[0].length));
 
-        // add components
-        JLabel[][] cellArray = new JLabel[solutionGrid.length][solutionGrid[0].length];
-        for(JLabel[] row : cellArray) {
-            for (JLabel column : row) {
-                column = new JLabel();
-            }
-          }
-          
-
+        //Fills the grid with the cell class
         for (int i = 0; i < solutionGrid.length; i++) {
             for (int j = 0; j < solutionGrid[0].length; j++) {
-                cellArray[1][1].setText(Character.toString(solutionGrid[i][j]));
-                if (cellArray[i][j].getText().charAt(0) != '\u0000'){
-                    cellArray[i][j].setBackground(Color.green);
-                }
+                add(new Cell(i, j, crosswordGrid, solutionGrid).element);
             }
         }
     }
+
+    /*
+     * Make Word List
+     * Converts a txt file into a array of strings
+     * @param input a scanner reading the terminal
+     * @returns String[] a list of strings with each element being a diffrent word
+     */
     public static String[] makeWordList(Scanner input) {
+        //A scanner reading the input file
         Scanner inputFile = getInputFile(input);
+        
         //Makes sure the input file contains valid words and adds it to word list
         ArrayList<String> wordList = new ArrayList<String>();
         while (inputFile.hasNextLine()) {
@@ -110,27 +118,38 @@ public class CrosswordSolver extends JFrame {
                 }
 
                 wordList.add(nextWord);
-                
+
+                //Checks if there are more than 10 words and throws an error if there is
                 if (wordList.size() > 10) {
                     throw new Exception();
                 }
 
+            //Displays an error message if an exception is thrown
             } catch (Exception e) {
                 System.out.println("Invalid Input File Try Again");
                 inputFile = getInputFile(input);
                 wordList.clear();
             }
         }
+            // Returns the list of words
             String[] returnList = new String[wordList.size()];
             return wordList.toArray(returnList);
        
     }
     
+    /*
+     * Get Input Files
+     * Returnes a scanner that reads the inputed file
+     * @param input a scanner reading the terminal
+     * @returns Scanner scanner that reads the inputed file
+     */
     public static Scanner getInputFile(Scanner input){
+        //Loops until a valid input is given
         while (true) {
             System.out.print("\nEnter The Input File Name: ");
         
             try {
+                //returns a scanner reading the inputed line
                 return new Scanner(new File(input.nextLine()));
 
             } catch (Exception e) {
@@ -174,5 +193,27 @@ public class CrosswordSolver extends JFrame {
         }
 
         return returnGrid;
+    }
+}
+
+//A cell class used to fill each square of the grid
+class Cell {
+    //The contents of each square of the grid
+    JLabel element;
+
+    public Cell(int row,int column, char[][] wordSearch, char[][] solutionGrid) {
+        this.element = new JLabel(Character.toString(wordSearch[row][column]).toUpperCase(), SwingConstants.CENTER);
+        if (solutionGrid[row][column] != '\u0000') {
+            element.setBackground(new Color(205,231,202));
+            element.setForeground(new Color(114,131,112));
+            element.setText("<html><b>"+Character.toString(wordSearch[row][column]).toUpperCase()+"</b></html>"); //Bold
+        } 
+        else {
+            element.setBackground(new Color(114,131,112));
+            element.setForeground(new Color(205,231,202));
+        }
+        element.setBorder(BorderFactory.createLineBorder(new Color(75,81,74),2));
+        element.setOpaque(true);
+
     }
 }

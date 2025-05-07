@@ -10,7 +10,7 @@ import javax.swing.SwingConstants;
 import java.awt.GridLayout;
 import java.awt.Color;
 
-public class CrosswordSolver extends JFrame {
+public class WordSearchSolver extends JFrame {
     public static void main(String[] args) {
         //A Hashmap that converts a number (0-7) to a direction matrix
         //0 is north and it rotates clockwise
@@ -32,20 +32,20 @@ public class CrosswordSolver extends JFrame {
             //String array with a list of words
             String[] wordList = makeWordList(input);
 
-            //Creates the crossword grid
-            char[][] crosswordGrid = readCrossword(getInputFile(input,"Crossword"));
+            //Creates the wordsearch grid
+            char[][] wordsearchGrid = readWordSearch(getInputFile(input,"Wordsearch"));
 
             // Start of the execution timer
             double startTime = System.nanoTime(); 
             
             //Generates a solved wordsearch
-            char[][] solutionGrid = solveCrossword(crosswordGrid, wordList, directionMap);
+            char[][] solutionGrid = solveWordsearch(wordsearchGrid, wordList, directionMap);
 
             // End of the execution timer
             double stopTime = System.nanoTime();
 
             //Displays the window
-            new CrosswordSolver(solutionGrid, crosswordGrid,(stopTime-startTime) / 1000000);
+            new WordSearchSolver(solutionGrid, wordsearchGrid,(stopTime-startTime) / 10000000);
 
             //Displays a message to the user to show that the program is compleat
             System.out.println("Wordsearch Solved!");
@@ -65,7 +65,7 @@ public class CrosswordSolver extends JFrame {
     }
 
     //The visuals output of the file
-    public CrosswordSolver(char[][] solutionGrid, char[][] crosswordGrid, double executionTime) { 
+    public WordSearchSolver(char[][] solutionGrid, char[][] wordsearchGrid, double executionTime) { 
         //Sets the tiles to the run time of the file
         setTitle("Wordsearch Solver (Executed in " + Double.toString(executionTime) + "ms)");
 
@@ -80,7 +80,7 @@ public class CrosswordSolver extends JFrame {
         //Fills the grid with the cell class
         for (int i = 0; i < solutionGrid.length; i++) {
             for (int j = 0; j < solutionGrid[0].length; j++) {
-                add(new Cell(i, j, crosswordGrid, solutionGrid).element);
+                add(new Cell(i, j, wordsearchGrid, solutionGrid).element);
             }
         }
     }
@@ -148,14 +148,14 @@ public class CrosswordSolver extends JFrame {
     }
     
     /*
-     * Solve Crossword
-     * Finds all words in the crossword
+     * Solve Wordsearch
+     * Finds all words in the wordsearch
      * @param wordsearchgrid the word search grid to be searched
      * @param wordList the list of words to find
      * @param directionMap a refrance to all posible directions a word could be placed in
      * @returns char[][] a 2d array will all found words in it and letters not part of the words repersented as null
      */
-    public static char[][] solveCrossword(char[][] wordsearchGrid, String[] wordList, HashMap<Integer,int[]> directionMap) {
+    public static char[][] solveWordsearch(char[][] wordsearchGrid, String[] wordList, HashMap<Integer,int[]> directionMap) {
         
         //Creates an array to store the solution
         char[][] solutionGrid = new char[wordsearchGrid.length][wordsearchGrid[0].length];
@@ -194,18 +194,18 @@ public class CrosswordSolver extends JFrame {
     }
 
     /*
-     * Read Crossword
+     * Read Word Search
      * Converts the file into a 2d char array
-     * @param crosswordFile a scanner scanning the crossword file
+     * @param wordsearchFile a scanner scanning the wordsearch file
      * @returns char[][] a 2d array of the wordsearch
      */
-    public static char[][] readCrossword(Scanner crosswordFile){
+    public static char[][] readWordSearch(Scanner wordsearchFile){
         //Creates a wordsearch of varible length
         ArrayList<char[]> wordsearch = new ArrayList<char[]>();
         
         //Fills the array with all characters
-        while (crosswordFile.hasNext()) {
-            wordsearch.add(crosswordFile.nextLine().toCharArray());
+        while (wordsearchFile.hasNext()) {
+            wordsearch.add(wordsearchFile.nextLine().toCharArray());
         }
 
         //Creates a fixed size array

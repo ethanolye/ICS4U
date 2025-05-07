@@ -234,7 +234,7 @@ public class WordSearchGenerator {
         //Create a copy of the grid
         char[][] returnGrid = Arrays.stream(wordSearchGrid).map(char[]::clone).toArray(char[][]::new);
 
-        //Grab the direction matrix
+        //Choose a direction
         int[] direction = directionMap.get(rng.nextInt(8));
 
         //Picks a random starting space
@@ -258,7 +258,6 @@ public class WordSearchGenerator {
 
         //Exception if the word is not placed
         } catch (Exception e) {
-            System.out.println(wordList[currentWord] + " | " + Arrays.toString(startPosition) + " | " + Arrays.toString(direction)); //TODO debug
             return generateWordSearch(wordSearchGrid, wordList, directionMap, rng, currentWord);
         }
     }

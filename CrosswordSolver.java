@@ -33,7 +33,7 @@ public class CrosswordSolver extends JFrame {
             String[] wordList = makeWordList(input);
 
             //Creates the crossword grid
-            char[][] crosswordGrid = readCrossword(getInputFile(input));
+            char[][] crosswordGrid = readCrossword(getInputFile(input,"Crossword"));
 
             // Start of the execution timer
             double startTime = System.nanoTime(); 
@@ -93,7 +93,7 @@ public class CrosswordSolver extends JFrame {
      */
     public static String[] makeWordList(Scanner input) {
         //A scanner reading the input file
-        Scanner inputFile = getInputFile(input);
+        Scanner inputFile = getInputFile(input,"Word List");
         
         //Makes sure the input file contains valid words and adds it to word list
         ArrayList<String> wordList = new ArrayList<String>();
@@ -115,7 +115,7 @@ public class CrosswordSolver extends JFrame {
             //Displays an error message if an exception is thrown
             } catch (Exception e) {
                 System.out.println("Invalid Input File Try Again");
-                inputFile = getInputFile(input);
+                inputFile = getInputFile(input, "Word List");
                 wordList.clear();
             }
         }
@@ -131,10 +131,10 @@ public class CrosswordSolver extends JFrame {
      * @param input a scanner reading the terminal
      * @returns Scanner scanner that reads the inputed file
      */
-    public static Scanner getInputFile(Scanner input){
+    public static Scanner getInputFile(Scanner input, String displayedMessage){
         //Loops until a valid input is given
         while (true) {
-            System.out.print("\nEnter The Input File Name: ");
+            System.out.printf("\nEnter The %s File Name: ",displayedMessage);
         
             try {
                 //returns a scanner reading the inputed line
